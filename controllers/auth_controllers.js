@@ -11,7 +11,8 @@ function register (req, res) {
     if (err) {
       return res.send(err)
     }
-    res.redirect('/profile')
+
+    res.redirect('/profile') // ~~ client req GET /profile
   })
 }
 
@@ -32,6 +33,7 @@ function login (req, res) {
       res.send('invalid, show flash message')
     }
   })
+
   // User.valid(req.body.user.password) // returns true or false
 }
 module.exports = {

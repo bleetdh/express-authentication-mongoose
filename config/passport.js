@@ -1,34 +1,35 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
+
 const User = require('../models/User')
 
 // it will store into the session, currently logged in user
-// if session is not timed out, no need to log in again
+// when success => next(null, foundUser)
 passport.serializeUser(function (user, next) {
   next(null, user.id)
 })
 
-// it will open the session and convert id stored in session into the actual user object, accessible in req.user
+// it will open the session, and convert id stored in session into the actual user object, accessible in req.user
 passport.deserializeUser(function (id, next) {
-  User.findbyId(id, function (err, user) {
+  User.findById(id, function (err, user) {
     next(err, user)
   })
 })
 
 // local strategy
-// usernameField and pwField is optional, default is just username and pw. but in this case, we need to redefine to user[email] and user[pw]
+
 passport.use(
   new LocalStrategy(
     {
       usernameField: 'user[email]',
       passwordField: 'user[password]',
-      passReqToCallBack: true
+      passReqToCallback: true
     },
     localVerify
   )
 )
 
-// verify callback for local Strategy
+// verify callback for local strategy
 function localVerify (req, passportEmail, passportPassword, next) {
   User
   .findOne({
@@ -37,12 +38,12 @@ function localVerify (req, passportEmail, passportPassword, next) {
   .exec(function (err, foundUser) {
     if (err) {
       console.log('err', err)
-      return next(err)
-    } // goes to failureRedirect, which is defined in routes
+      return next(err) // go to failureRedirect
+    }
 
     if (foundUser.validPassword(passportPassword)) {
       console.log('success, redirect to /profile')
-      next(null, foundUser) // goes to successRedirect, which is defined in routes
+      next(null, foundUser) // go to successRedirect
     }
   })
 }

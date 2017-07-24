@@ -1,11 +1,13 @@
 var express = require('express')
 // var ejsLayouts = require('express-ejs-layouts')
-var bodyParser = require('body-parser')
-var mongoose = require('mongoose')
-var app = express()
 const exphbs = require('express-handlebars')
 const session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
+
+var bodyParser = require('body-parser')
+var mongoose = require('mongoose')
+
+var app = express()
 
 if (process.env.NODE_ENV === 'test') {
   mongoose.connect('mongodb://localhost/express-authentication-test')
@@ -23,14 +25,17 @@ app.use(session({
   saveUninitialized: true
 }))
 
-// initialise passport
+// initialize passport
 const passport = require('./config/passport')
 app.use(passport.initialize())
-// the line bewlow must be after the session setup
+// the line below must be AFTER the session setup
 app.use(passport.session())
 
 app.use(require('morgan')('dev'))
 app.use(bodyParser.urlencoded({ extended: true }))
+
+// change this to express-handlebars
+// app.set('view engine', 'ejs')
 // app.use(ejsLayouts)
 app.engine('handlebars', exphbs({
   defaultLayout: 'main'
@@ -38,15 +43,23 @@ app.engine('handlebars', exphbs({
 app.set('view engine', 'handlebars')
 
 app.get('/', function (req, res) {
+  if (req.user) {
+    return res.send('hide login link')
+  }
+
   res.render('index')
 })
 
 app.get('/profile', function (req, res) {
-  res.render('profile')
+  res.send({
+    'currently logged in user': req.user
+  })
 })
 
+// all the routes variables
 const authRoutes = require('./routes/auth_routes')
 
+// app.use('/auth', require('./controllers/auth'))
 app.use('/', authRoutes)
 
 const port = process.env.PORT || 3000
