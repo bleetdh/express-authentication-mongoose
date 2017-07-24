@@ -6,15 +6,15 @@ var app = express()
 const exphbs = require('express-handlebars')
 
 if (process.env.NODE_ENV === 'test') {
-  mongoose.connect('mongodb://localhost/express-authentication')
-} else {
   mongoose.connect('mongodb://localhost/express-authentication-test')
+} else {
+  mongoose.connect('mongodb://localhost/express-authentication')
 }
 
 // app.set('view engine', 'ejs')
 
 app.use(require('morgan')('dev'))
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: true }))
 // app.use(ejsLayouts)
 app.engine('handlebars', exphbs({
   defaultLayout: 'main'
