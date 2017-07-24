@@ -23,6 +23,13 @@ userSchema.pre('save', function (next) {
   })
 })
 
+// defining what validPassword will do because validPassowrd is not an in-built method
+// validPassword is used in auth_controllers
+userSchema.methods.validPassword = function (givenPassword) {
+  // t or f based on the user.hash compared with form.password
+  return bcrypt.compareSync(givenPassword, this.password) // this = foundUser
+}
+
 const User = mongoose.model('User', userSchema)
 
 module.exports = User

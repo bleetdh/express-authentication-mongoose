@@ -4,6 +4,8 @@ var bodyParser = require('body-parser')
 var mongoose = require('mongoose')
 var app = express()
 const exphbs = require('express-handlebars')
+const session = require('express-session')
+const MongoStore = require('connect-mongo')(session)
 
 if (process.env.NODE_ENV === 'test') {
   mongoose.connect('mongodb://localhost/express-authentication-test')
@@ -11,7 +13,21 @@ if (process.env.NODE_ENV === 'test') {
   mongoose.connect('mongodb://localhost/express-authentication')
 }
 
-// app.set('view engine', 'ejs')
+// setup express session
+app.use(session({
+  store: new MongoStore({
+    url: 'mongodb://localhost/express-authentication'
+  }),
+  secret: 'foo',
+  resave: false,
+  saveUninitialized: true
+}))
+
+// initialise passport
+const passport = require('./config/passport')
+app.use(passport.initialize())
+// the line bewlow must be after the session setup
+app.use(passport.session())
 
 app.use(require('morgan')('dev'))
 app.use(bodyParser.urlencoded({ extended: true }))
